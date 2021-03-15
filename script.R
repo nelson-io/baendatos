@@ -54,18 +54,34 @@ cartogram_df <- cbind(cartogram_df, st_coordinates(st_centroid(cartogram_df)))
 
 
 p <- ggplot(cartogram_df ) + 
-  geom_sf(aes(fill = diferencial_ingresos_medianos))+
-  geom_text(aes(x = X, y = Y, label = paste0(round(100*diferencial_ingresos_medianos), '%')), color = 'white')+
-  scale_fill_viridis_c(labels = scales::percent)+
+  geom_sf(
+    aes(fill = diferencial_ingresos_medianos)
+    )+
+  geom_text(aes(x = X, y = Y, label = paste0(round(100*diferencial_ingresos_medianos), '%')), color = 'white', size = 7)+
+  scale_fill_gradient(
+    low = "#C2C2C2",
+    high = "#FF0000",
+    space = "Lab",
+    na.value = "grey50",
+    guide = "colourbar",
+    aesthetics = "fill", labels = scales::percent)+
   labs(fill = "Diferencial de Ingresos Medianos")+
-  theme_map()+ theme(legend.position = c(.6, 0.05),
+  theme_map()+ 
+  theme(legend.position = c(.5, 0.05),
                      legend.direction = "horizontal",
-                     plot.title = element_text(size=22)) 
+                     plot.title = element_text(size=50),
+        legend.text = element_text(size=12),
+        legend.title = element_text(size=12),
+        legend.key.size = unit(1,'cm')) 
 
-anim <- p+ transition_states(year, transition_length = 2, state_length = 2) + ggtitle('Año {closest_state}')
+anim <- p+ transition_states(year, transition_length = 2, state_length = 5) + ggtitle('Año {closest_state}')
+
+# animate(anim,
+#         renderer = ffmpeg_renderer(options = list(pix_fmt = "yuv420p")),
+#         width = 800, height = 800, duration = 30, nframes = 300)
 
 animate(anim,
-        # renderer = magick_renderer(),
+        renderer = file_renderer(dir = './plots', prefix = 'gganim_plot', overwrite = T),
         width = 800, height = 800, duration = 30, nframes = 300)
 
-anim_save('anim.gif')
+# anim_save('anim.mp4')
